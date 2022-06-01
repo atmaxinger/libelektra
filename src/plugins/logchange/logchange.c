@@ -36,6 +36,8 @@ int elektraLogchangeGet (Plugin * handle, KeySet * returned, Key * parentKey ELE
 			keyNew ("system:/elektra/modules/logchange/exports", KEY_END),
 			keyNew ("system:/elektra/modules/logchange/exports/get", KEY_FUNC, elektraLogchangeGet, KEY_END),
 			keyNew ("system:/elektra/modules/logchange/exports/set", KEY_FUNC, elektraLogchangeSet, KEY_END),
+			keyNew ("system:/elektra/modules/logchange/exports/commit", KEY_FUNC, elektraLogchangeCommit, KEY_END),
+
 			keyNew ("system:/elektra/modules/logchange/exports/close", KEY_FUNC, elektraLogchangeClose, KEY_END),
 #include ELEKTRA_README
 			keyNew ("system:/elektra/modules/logchange/infos/version", KEY_VALUE, PLUGINVERSION, KEY_END), KS_END);
@@ -112,6 +114,12 @@ int elektraLogchangeClose (Plugin * handle, Key * parentKey ELEKTRA_UNUSED)
 	return 1; /* success */
 }
 
+int elektraLogchangeCommit (Plugin * handle ELEKTRA_UNUSED, KeySet * returned, Key * parentKey ELEKTRA_UNUSED)
+{
+	return 1;
+	return elektraLogchangeSet (handle, returned, parentKey);
+}
+
 Plugin * ELEKTRA_PLUGIN_EXPORT
 {
 	// clang-format off
@@ -119,5 +127,6 @@ Plugin * ELEKTRA_PLUGIN_EXPORT
 		ELEKTRA_PLUGIN_GET,	&elektraLogchangeGet,
 		ELEKTRA_PLUGIN_SET,	&elektraLogchangeSet,
 		ELEKTRA_PLUGIN_CLOSE,	&elektraLogchangeClose,
+		ELEKTRA_PLUGIN_COMMIT, &elektraLogchangeCommit,
 		ELEKTRA_PLUGIN_END);
 }

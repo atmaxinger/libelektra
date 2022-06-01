@@ -2,7 +2,7 @@
 - infos/author = Markus Raab <elektra@libelektra.org>
 - infos/licence = BSD
 - infos/provides = storage/hosts
-- infos/needs =
+- infos/needs = simplelogger
 - infos/recommends = glob error network
 - infos/placements = getstorage setstorage
 - infos/status = maintained unittest nodep libc limited

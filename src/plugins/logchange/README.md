@@ -2,7 +2,7 @@
 - infos/author = Markus Raab <elektra@libelektra.org>
 - infos/licence = BSD
 - infos/needs =
-- infos/provides = tracing
+- infos/provides = tracing logchange
 - infos/placements = pregetstorage postgetstorage postcommit
 - infos/status = maintained nodep global nodoc
 - infos/description = demonstrates notification of key changes

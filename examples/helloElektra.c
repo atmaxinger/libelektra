@@ -30,8 +30,8 @@ int main (void)
 	printf ("\n%s, %s\n\n", keyBaseName (key), keyString (key));
 
 	// If you want to store the key database on disk, then please uncomment the following two lines
-	// printf ("Write key set to disk\n");
-	// kdbSet (handle, config, root);
+	 printf ("Write key set to disk\n");
+	 kdbSet (handle, config, root);
 
 	printf ("Delete key-value pairs inside memory\n");
 	ksDel (config);
