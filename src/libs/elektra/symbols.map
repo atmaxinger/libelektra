@@ -211,4 +211,21 @@ libelektraprivate_1.0 {
 	elektraErrorSpecification;
 	elektraTriggerError;
 	elektraTriggerWarnings;
+
+	# kdbchangetracking.h
+	elektraChangeTrackingIsEnabled;
+	elektraChangeTrackingGetContext;
+	elektraChangeTrackingGetAddedKeys;
+	elektraChangeTrackingGetRemovedKeys;
+	elektraChangeTrackingGetModifiedKeys;
+	elektraChangeTrackingValueChanged;
+	elektraChangeTrackingMetaChanged;
+	elektraChangeTrackingGetAddedMetaKeys;
+	elektraChangeTrackingGetRemovedMetaKeys;
+	elektraChangeTrackingGetModifiedMetaKeys;
+	elektraChangeTrackingGetOriginalKey;
+	elektraChangeTrackingGetOriginalMetaKey;
+
+	elektraChangeTrackingCreateMock;
+	elektraChangeTrackingFreeMock;
 };

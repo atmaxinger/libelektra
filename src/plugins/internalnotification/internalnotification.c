@@ -164,10 +164,11 @@ void elektraInternalnotificationDoUpdate (Key * changedKey, ElektraNotificationC
 
 	if (kdbChanged)
 	{
-		KeySet * global = elektraPluginGetGlobalKeySet (plugin);
+		/*KeySet * global = elektraPluginGetGlobalKeySet (plugin);
 		Key * kdbKey = ksLookupByName (global, "system:/elektra/kdb", 0);
 		const void * kdbPtr = keyValue (kdbKey);
-		KDB * kdb = kdbPtr == NULL ? NULL : *(KDB **) keyValue (kdbKey);
+		KDB * kdb = kdbPtr == NULL ? NULL : *(KDB **) keyValue (kdbKey);*/
+		KDB * kdb = elektraPluginGetKdb (plugin);
 		context->kdbUpdate (kdb, changedKey);
 	}
 	keyDel (changedKey);

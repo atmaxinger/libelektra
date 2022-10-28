@@ -19,6 +19,7 @@
 #include <kdbnotificationinternal.h>
 #include <kdbplugin.h>
 #include <kdbtypes.h>
+#include <kdbchangetracking.h>
 #ifdef ELEKTRA_ENABLE_OPTIMIZATIONS
 #include <kdbopmphm.h>
 #include <kdbopmphmpredictor.h>
@@ -362,6 +363,8 @@ struct _KDB
 
 		struct _SendNotificationHook * sendNotification;
 	} hooks;
+
+	ChangeTrackingContext * changeTrackingContext;
 };
 
 /**
@@ -408,6 +411,27 @@ struct _Plugin
 
 	KeySet * modules; /*!< A list of all currently loaded modules.*/
 };
+
+/**
+ * Holds all information to a specific change tracking
+ */
+struct _ChangeTrackingContext
+{
+	KeySet * addedKeys;
+	KeySet * modifiedKeys;
+	KeySet * removedKeys;
+
+	/**
+	 * Stores the old keys for the keys in modified keys
+	 */
+	KeySet * oldValues;
+};
+
+void elektraChangeTrackingReset (KDB * handle, const KeySet * keys, Key * parentKey);
+void elektraTrackChanges (KDB * handle, KeySet * newKeys, Key * parentKey);
+ChangeTrackingContext * elektraChangeTrackingContextNew (void);
+void elektraChangeTrackingContextFree(ChangeTrackingContext * context);
+
 
 /**
  * Holds all data for one backend.

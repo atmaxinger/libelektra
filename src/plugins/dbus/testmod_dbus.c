@@ -32,6 +32,13 @@ DBusBusType testBusType;
 /** key namespace to use for tests */
 char * testKeyNamespace;
 
+ChangeTrackingContext * changeTrackingContext;
+
+ChangeTrackingContext * elektraChangeTrackingGetContext (ELEKTRA_UNUSED KDB * kdb, ELEKTRA_UNUSED /* for later user */ Key * parentKey)
+{
+	return changeTrackingContext;
+}
+
 /**
  * @internal
  * Process D-Bus messages and check for expected message.
@@ -176,6 +183,7 @@ static void test_keyAdded (void)
 {
 	printf ("test adding keys\n");
 
+
 	// (namespace)/tests/foo
 	Key * parentKey = keyNew (testKeyNamespace, KEY_END);
 	keyAddName (parentKey, "tests/foo");
@@ -191,6 +199,8 @@ static void test_keyAdded (void)
 	PLUGIN_OPEN ("dbus");
 
 	// initial get to save current state
+	KeySet * ksOld = ksDup (ks);
+
 	plugin->kdbGet (plugin, ks, parentKey);
 
 	// add key to keyset
@@ -199,6 +209,8 @@ static void test_keyAdded (void)
 	DBusConnection * connection = getDbusConnection (testBusType);
 	TestContext * context = createTestContext (connection, "KeyAdded");
 	elektraDbusSetupReceiveMessage (connection, receiveMessageHandler, (void *) context);
+
+	changeTrackingContext = elektraChangeTrackingCreateMock (ks, ksOld, parentKey);
 
 	plugin->kdbCommit (plugin, ks, parentKey);
 	runDispatch (context);
@@ -209,8 +221,10 @@ static void test_keyAdded (void)
 	elektraDbusTeardownReceiveMessage (connection, receiveMessageHandler, (void *) context);
 	dbus_connection_unref (connection);
 	ksDel (ks);
+	ksDel (ksOld);
 	keyDel (parentKey);
 	PLUGIN_CLOSE ();
+	elektraChangeTrackingFreeMock (changeTrackingContext);
 }
 
 static void test_keyChanged (void)
@@ -236,6 +250,7 @@ static void test_keyChanged (void)
 	PLUGIN_OPEN ("dbus");
 
 	// initial get to save current state
+	KeySet * ksOld = ksDeepDup (ks);
 	plugin->kdbGet (plugin, ks, parentKey);
 
 	// change key in keyset
@@ -244,6 +259,8 @@ static void test_keyChanged (void)
 	DBusConnection * connection = getDbusConnection (testBusType);
 	TestContext * context = createTestContext (connection, "KeyChanged");
 	elektraDbusSetupReceiveMessage (connection, receiveMessageHandler, (void *) context);
+
+	changeTrackingContext = elektraChangeTrackingCreateMock (ks, ksOld, parentKey);
 
 	plugin->kdbCommit (plugin, ks, parentKey);
 	runDispatch (context);
@@ -256,6 +273,8 @@ static void test_keyChanged (void)
 	ksDel (ks);
 	keyDel (parentKey);
 	PLUGIN_CLOSE ();
+	ksDel (ksOld);
+	elektraChangeTrackingFreeMock (changeTrackingContext);
 }
 
 static void test_keyDeleted (void)
@@ -277,6 +296,7 @@ static void test_keyDeleted (void)
 	PLUGIN_OPEN ("dbus");
 
 	// initial get to save current state
+	KeySet * ksOld = ksDeepDup (ks);
 	plugin->kdbGet (plugin, ks, parentKey);
 
 	// remove key from keyset
@@ -286,6 +306,8 @@ static void test_keyDeleted (void)
 	DBusConnection * connection = getDbusConnection (testBusType);
 	TestContext * context = createTestContext (connection, "KeyDeleted");
 	elektraDbusSetupReceiveMessage (connection, receiveMessageHandler, (void *) context);
+
+	changeTrackingContext = elektraChangeTrackingCreateMock (ks, ksOld, parentKey);
 
 	plugin->kdbCommit (plugin, ks, parentKey);
 	runDispatch (context);
@@ -297,8 +319,10 @@ static void test_keyDeleted (void)
 	dbus_connection_unref (connection);
 	keyDel (toDelete);
 	ksDel (ks);
+	ksDel (ksOld);
 	keyDel (parentKey);
 	PLUGIN_CLOSE ();
+	elektraChangeTrackingFreeMock (changeTrackingContext);
 }
 
 static void test_announceOnce (void)
@@ -329,6 +353,7 @@ static void test_announceOnce (void)
 	PLUGIN_OPEN ("dbus");
 
 	// initial get to save current state
+	KeySet * ksOld = ksDeepDup (ks);
 	plugin->kdbGet (plugin, ks, parentKey);
 
 	// modify keyset
@@ -339,6 +364,8 @@ static void test_announceOnce (void)
 	DBusConnection * connection = getDbusConnection (testBusType);
 	TestContext * context = createTestContext (connection, "Commit");
 	elektraDbusSetupReceiveMessage (connection, receiveMessageHandler, (void *) context);
+
+	changeTrackingContext = elektraChangeTrackingCreateMock (ks, ksOld, parentKey);
 
 	plugin->kdbCommit (plugin, ks, parentKey);
 	runDispatch (context);
@@ -351,6 +378,8 @@ static void test_announceOnce (void)
 	ksDel (ks);
 	keyDel (parentKey);
 	PLUGIN_CLOSE ();
+	ksDel (ksOld);
+	elektraChangeTrackingFreeMock (changeTrackingContext);
 }
 
 static void test_cascadedChangeNotification (void)
@@ -374,6 +403,7 @@ static void test_cascadedChangeNotification (void)
 	PLUGIN_OPEN ("dbus");
 
 	// initial get to save current state
+	KeySet * ksOld = ksDeepDup (ks);
 	plugin->kdbGet (plugin, ks, parentKey);
 
 	// add key to keyset
@@ -382,6 +412,8 @@ static void test_cascadedChangeNotification (void)
 	DBusConnection * connection = getDbusConnection (testBusType);
 	TestContext * context = createTestContext (connection, "KeyAdded");
 	elektraDbusSetupReceiveMessage (connection, receiveMessageHandler, (void *) context);
+
+	changeTrackingContext = elektraChangeTrackingCreateMock (ks, ksOld, parentKey);
 
 	plugin->kdbCommit (plugin, ks, parentKey);
 	runDispatch (context);
@@ -394,6 +426,8 @@ static void test_cascadedChangeNotification (void)
 	ksDel (ks);
 	keyDel (parentKey);
 	PLUGIN_CLOSE ();
+	ksDel (ksOld);
+	elektraChangeTrackingFreeMock (changeTrackingContext);
 }
 
 static void test_cascadedAnnounceOnce (void)
@@ -417,6 +451,7 @@ static void test_cascadedAnnounceOnce (void)
 	PLUGIN_OPEN ("dbus");
 
 	// initial get to save current state
+	KeySet * ksOld = ksDeepDup (ks);
 	plugin->kdbGet (plugin, ks, parentKey);
 
 	// add key to keyset
@@ -425,6 +460,8 @@ static void test_cascadedAnnounceOnce (void)
 	DBusConnection * connection = getDbusConnection (testBusType);
 	TestContext * context = createTestContext (connection, "Commit");
 	elektraDbusSetupReceiveMessage (connection, receiveMessageHandler, (void *) context);
+
+	changeTrackingContext = elektraChangeTrackingCreateMock (ks, ksOld, parentKey);
 
 	plugin->kdbCommit (plugin, ks, parentKey);
 	runDispatch (context);
@@ -437,6 +474,8 @@ static void test_cascadedAnnounceOnce (void)
 	ksDel (ks);
 	keyDel (parentKey);
 	PLUGIN_CLOSE ();
+	ksDel (ksOld);
+	elektraChangeTrackingFreeMock (changeTrackingContext);
 }
 
 int main (int argc, char ** argv)

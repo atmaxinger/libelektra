@@ -999,6 +999,12 @@ KDB * kdbOpen (const KeySet * contract, Key * errorKey)
 		goto error;
 	}
 
+	bool enableChangeTracking = true;
+	if (enableChangeTracking)
+	{
+		handle->changeTrackingContext = elektraChangeTrackingContextNew();
+	}
+
 	keyCopy (errorKey, initialParent, KEY_CP_NAME | KEY_CP_VALUE);
 	keyDel (initialParent);
 	errno = errnosave;
@@ -1064,6 +1070,12 @@ int kdbClose (KDB * handle, Key * errorKey)
 	}
 
 	freeHooks (handle, errorKey);
+
+	if (handle->changeTrackingContext)
+	{
+		elektraChangeTrackingContextFree (handle->changeTrackingContext);
+		handle->changeTrackingContext = NULL;
+	}
 
 	if (handle->modules)
 	{
@@ -1956,6 +1968,8 @@ int kdbGet (KDB * handle, KeySet * ks, Key * parentKey)
 			 KEY_CP_STRING);
 	}
 
+	elektraChangeTrackingReset (handle, ks, parentKey);
+
 	ksDel (backends);
 	ksDel (allBackends);
 	ksDel (dataKs);
@@ -2380,6 +2394,16 @@ int kdbSet (KDB * handle, KeySet * ks, Key * parentKey)
 	if (handle->hooks.spec.plugin && handle->hooks.spec.copy (handle->hooks.spec.plugin, ks, parentKey, false) == -1)
 	{
 		goto error;
+	}
+
+	if(handle->changeTrackingContext != NULL)
+	{
+		KeySet * old = ksNew (0, KS_END);
+
+		backendsMerge (backends, old);
+		elektraTrackChanges (handle, ks, parentKey);
+
+		ksDel (old);
 	}
 
 	// Step 4: create deep-copy of ks
